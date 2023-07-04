@@ -5,6 +5,12 @@ name = "pypi"
 
 [packages]
 chromadb = "*"
+sentence-transformers = "*"
+langchain = "*"
+openai = "*"
+tiktoken = "*"
+openllm = "*"
+gpt4all = "*"
 
 [dev-packages]
 

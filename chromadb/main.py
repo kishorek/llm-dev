@@ -1,10 +1,22 @@
 from glob import glob
 from pprint import pprint
 import chromadb
+from chromadb.utils import embedding_functions
+from chromadb.config import Settings
 
-client = chromadb.Client()
 
-collection = client.create_collection("schittscreak")
+client = chromadb.Client(
+    Settings(chroma_db_impl="duckdb+parquet", persist_directory=".chromadb")
+)
+
+sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+    model_name="all-MiniLM-L6-v2"
+)
+# model_name="multi-qa-MiniLM-L6-cos-v1"
+
+collection = client.get_or_create_collection(
+    "schittscreak", embedding_function=sentence_transformer_ef
+)
 
 documents = []
 sources = []
@@ -14,8 +26,10 @@ for idx, episode in enumerate(glob("schittscreek/*.txt")):
     sources.append({"source": episode.split("/")[1]})
     ids.append(str(idx + 1))
 
-collection.add(documents=documents, metadatas=sources, ids=ids)
+collection.upsert(documents=documents, metadatas=sources, ids=ids)
 
-results = collection.query(query_texts=["did johnny deliver a eulogy?"], n_results=1)
+print(collection._embedding_function)
+
+results = collection.query(query_texts=["Johnny speech for the deceased"], n_results=1)
 
 pprint(results)
